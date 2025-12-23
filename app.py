@@ -50,11 +50,13 @@ def load_or_train_model():
     """
     Load existing model or train a new one if it doesn't exist.
     """
-    global model, scaler, model_name, model_metrics
+    global model, scaler, model_name, model_metrics, all_models, feature_names
     
     model_path = os.path.join(MODEL_DIR, 'fraud_model.pkl')
     scaler_path = os.path.join(MODEL_DIR, 'scaler.pkl')
     metrics_path = os.path.join(MODEL_DIR, 'model_metrics.json')
+    all_models_path = os.path.join(MODEL_DIR, 'all_models.pkl')
+    feature_names_path = os.path.join(MODEL_DIR, 'feature_names.pkl')
     
     # Check if model exists
     if os.path.exists(model_path) and os.path.exists(scaler_path):
@@ -62,20 +64,41 @@ def load_or_train_model():
             print("Loading existing model...")
             model = joblib.load(model_path)
             scaler = joblib.load(scaler_path)
-            model_name = 'Random Forest'  # Default model name
+            
+            # Load feature names
+            if os.path.exists(feature_names_path):
+                feature_names = joblib.load(feature_names_path)
+                print(f"✓ Loaded {len(feature_names)} feature names")
+            else:
+                feature_names = None
+                print("⚠ Warning: Feature names not found, may cause prediction errors")
+            
+            # Try to load all models for ensemble
+            if os.path.exists(all_models_path):
+                try:
+                    all_models = joblib.load(all_models_path)
+                    print(f"✓ Loaded {len(all_models)} models for ensemble")
+                except:
+                    all_models = None
             
             if os.path.exists(metrics_path):
                 with open(metrics_path, 'r') as f:
                     model_metrics = json.load(f)
+                    model_name = model_metrics.get('best_model', 'Random Forest')
+            else:
+                model_name = 'Random Forest'
             
-            print("✓ Model loaded successfully")
+            print(f"✓ Model loaded successfully: {model_name}")
+            logger.info(f"Model loaded: {model_name}")
             return True
         except Exception as e:
+            logger.error(f"Error loading model: {e}", exc_info=True)
             print(f"Error loading model: {e}")
             return False
     else:
         print("No existing model found. Training new model...")
-        return train_new_model()
+        logger.info("Training new model...")
+        return train_new_model(use_advanced=True)
 
 
 def train_new_model(use_advanced=True):
