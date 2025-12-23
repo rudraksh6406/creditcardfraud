@@ -422,11 +422,24 @@ def model_info():
 def generate_sample():
     """
     API endpoint to generate a sample transaction for testing.
+    Includes all features that the model expects.
     """
-    # Generate a random sample transaction
+    # Generate a random sample transaction with all required features
+    time_val = int(np.random.randint(0, 172792))
+    hour = int((time_val / 3600) % 24)
+    
     sample = {
-        'Time': int(np.random.randint(0, 172792)),
-        'Amount': float(np.random.exponential(88))
+        'Time': time_val,
+        'Amount': float(np.random.exponential(88)),
+        'Hour': hour,
+        'DayOfWeek': np.random.randint(0, 7),
+        'DayOfMonth': np.random.randint(1, 29),
+        'DistanceFromHome': float(np.random.exponential(50)),
+        'TimeSinceLastTransaction': float(np.random.exponential(3600)),
+        'TransactionsLast24H': np.random.poisson(2),
+        'Latitude': float(40.7128 + np.random.normal(0, 0.1)),
+        'Longitude': float(-74.0060 + np.random.normal(0, 0.1)),
+        'MCC': int(np.random.choice([5411, 5542, 5812, 5999, 5732, 4722, 7011]))
     }
     
     # Generate V1-V28 features

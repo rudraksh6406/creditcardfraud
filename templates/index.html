@@ -400,6 +400,44 @@
                 </div>
             </div>
         </div>
+
+        <!-- AI Chatbot Section -->
+        <div class="card" style="margin-top: 20px; grid-column: 1 / -1;">
+            <h2>🤖 AI Fraud Detection Assistant</h2>
+            <p style="color: #666; margin-bottom: 15px; font-size: 0.9em;">
+                Ask questions about fraud detection, transaction analysis, or get help understanding the results.
+            </p>
+            
+            <div id="chatbot-container" style="background: #f9f9f9; border-radius: 10px; padding: 15px; max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
+                <div id="chat-messages" style="min-height: 200px;">
+                    <div style="padding: 10px; background: #e3f2fd; border-radius: 5px; margin-bottom: 10px;">
+                        <strong>AI Assistant:</strong> Hello! I'm your fraud detection assistant. Ask me anything about credit card fraud detection, transaction analysis, or how the models work!
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="chat-input" placeholder="Ask a question about fraud detection..." 
+                       style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 14px;"
+                       onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                <button class="btn" onclick="sendChatMessage()">💬 Send</button>
+            </div>
+            
+            <div style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
+                <button class="btn" style="padding: 8px 15px; font-size: 0.85em; background: #e0e0e0; color: #333;" 
+                        onclick="document.getElementById('chat-input').value='What features are most important for fraud detection?'; sendChatMessage()">
+                    💡 Important Features
+                </button>
+                <button class="btn" style="padding: 8px 15px; font-size: 0.85em; background: #e0e0e0; color: #333;" 
+                        onclick="document.getElementById('chat-input').value='How does the fraud detection model work?'; sendChatMessage()">
+                    🔍 How It Works
+                </button>
+                <button class="btn" style="padding: 8px 15px; font-size: 0.85em; background: #e0e0e0; color: #333;" 
+                        onclick="document.getElementById('chat-input').value='What should I do if fraud is detected?'; sendChatMessage()">
+                    ⚠️ Fraud Detected
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
