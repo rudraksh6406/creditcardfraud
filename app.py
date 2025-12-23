@@ -34,6 +34,7 @@ scaler = None
 model_name = None
 model_metrics = None
 all_models = None  # Store all trained models for ensemble
+feature_names = None  # Store feature names used during training
 
 # Paths
 MODEL_DIR = 'models'
@@ -135,10 +136,15 @@ def train_new_model(use_advanced=True):
         # Update analytics
         analytics_tracker.update_model_performance(best_model_name, model_metrics['models'][best_model_name])
         
+        # Save feature names used during training
+        global feature_names
+        feature_names = list(X_train.columns)
+        
         # Save model and scaler
         joblib.dump(model, os.path.join(MODEL_DIR, 'fraud_model.pkl'))
         joblib.dump(scaler, os.path.join(MODEL_DIR, 'scaler.pkl'))
         joblib.dump(models, os.path.join(MODEL_DIR, 'all_models.pkl'))
+        joblib.dump(feature_names, os.path.join(MODEL_DIR, 'feature_names.pkl'))
         
         # Save metrics
         with open(os.path.join(MODEL_DIR, 'model_metrics.json'), 'w') as f:
@@ -157,6 +163,7 @@ def train_new_model(use_advanced=True):
 def preprocess_transaction(transaction_data):
     """
     Preprocess a single transaction for prediction.
+    Matches the exact features used during model training.
     
     Parameters:
     -----------
@@ -168,25 +175,91 @@ def preprocess_transaction(transaction_data):
     processed_data : numpy array
         Preprocessed transaction ready for prediction
     """
-    global scaler
+    global scaler, feature_names
     
     # Convert to DataFrame
     df = pd.DataFrame([transaction_data])
     
+    # Extract Time if present
+    time_value = df['Time'].iloc[0] if 'Time' in df.columns else 12345
+    
+    # Create all features that match training data
     # Handle Time feature (create cyclical features)
-    if 'Time' in df.columns:
-        df['Time_hour'] = (df['Time'] / 3600) % 24
+    if 'Time' in df.columns or time_value is not None:
+        time_val = time_value if 'Time' in df.columns else 12345
+        df['Time_hour'] = (time_val / 3600) % 24
         df['Time_sin'] = np.sin(2 * np.pi * df['Time_hour'] / 24)
         df['Time_cos'] = np.cos(2 * np.pi * df['Time_hour'] / 24)
-        df = df.drop(['Time', 'Time_hour'], axis=1)
+        if 'Time' in df.columns:
+            df = df.drop(['Time'], axis=1)
+        df = df.drop(['Time_hour'], axis=1)
     
-    # Ensure all required features are present
-    # If V1-V28 are missing, we'll need to handle that
-    # For now, assume they're all provided
+    # Ensure we have all numeric features that were used during training
+    # Keep only numeric columns
+    numeric_cols = df.select_dtypes(include=[np.number]).columns
+    df_numeric = df[numeric_cols].copy()
+    
+    # If we have feature names from training, ensure all are present
+    if feature_names is not None:
+        # Create a DataFrame with all required features
+        df_final = pd.DataFrame(index=[0])
+        
+        for feat_name in feature_names:
+            if feat_name in df_numeric.columns:
+                df_final[feat_name] = df_numeric[feat_name].iloc[0]
+            else:
+                # Fill missing features with default values
+                # For time-derived features, calculate from Time if available
+                if feat_name == 'Time_sin' and 'Time_sin' not in df_final.columns:
+                    time_val = transaction_data.get('Time', 12345)
+                    df_final[feat_name] = np.sin(2 * np.pi * ((time_val / 3600) % 24) / 24)
+                elif feat_name == 'Time_cos' and 'Time_cos' not in df_final.columns:
+                    time_val = transaction_data.get('Time', 12345)
+                    df_final[feat_name] = np.cos(2 * np.pi * ((time_val / 3600) % 24) / 24)
+                elif feat_name.startswith('V') and feat_name[1:].isdigit():
+                    # V1-V28 features - use provided value or 0
+                    df_final[feat_name] = transaction_data.get(feat_name, 0.0)
+                else:
+                    # Other features - use provided value or reasonable default
+                    defaults = {
+                        'Hour': transaction_data.get('Hour', int((time_value / 3600) % 24)) if 'Time' in transaction_data else 12,
+                        'DayOfWeek': transaction_data.get('DayOfWeek', 0),
+                        'DayOfMonth': transaction_data.get('DayOfMonth', 15),
+                        'DistanceFromHome': transaction_data.get('DistanceFromHome', 50.0),
+                        'TimeSinceLastTransaction': transaction_data.get('TimeSinceLastTransaction', 3600.0),
+                        'TransactionsLast24H': transaction_data.get('TransactionsLast24H', 2),
+                        'Latitude': transaction_data.get('Latitude', 40.7128),
+                        'Longitude': transaction_data.get('Longitude', -74.0060),
+                        'MCC': transaction_data.get('MCC', 5411),
+                        'Amount': transaction_data.get('Amount', 100.0)
+                    }
+                    df_final[feat_name] = transaction_data.get(feat_name, defaults.get(feat_name, 0.0))
+        
+        # Ensure columns are in the same order as training
+        df_final = df_final[feature_names]
+        df = df_final
+    else:
+        # Fallback: use what we have
+        df = df_numeric
     
     # Scale features
     if scaler is not None:
-        processed_data = scaler.transform(df)
+        try:
+            processed_data = scaler.transform(df)
+        except Exception as e:
+            logger.error(f"Scaling error: {e}. Feature mismatch detected.")
+            # Try to align features
+            if feature_names:
+                df_aligned = pd.DataFrame(index=[0])
+                for feat in feature_names:
+                    if feat in df.columns:
+                        df_aligned[feat] = df[feat].iloc[0]
+                    else:
+                        df_aligned[feat] = 0.0
+                df_aligned = df_aligned[feature_names]
+                processed_data = scaler.transform(df_aligned)
+            else:
+                raise e
     else:
         processed_data = df.values
     
