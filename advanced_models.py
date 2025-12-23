@@ -96,6 +96,11 @@ def train_lightgbm(X_train, y_train, **kwargs):
     model : LGBMClassifier
         Trained LightGBM model
     """
+    try:
+        import lightgbm as lgb
+    except ImportError:
+        raise ImportError("LightGBM is not installed. Install with: pip install lightgbm")
+    
     params = {
         'objective': 'binary',
         'metric': 'auc',
