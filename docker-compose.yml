@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  fraud-detection:
+    build: .
+    container_name: fraud-detection-app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+      - ./analytics:/app/analytics
+      - ./config:/app/config
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/model_info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+

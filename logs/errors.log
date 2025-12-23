@@ -1,0 +1,44 @@
+2025-12-19 13:31:31 - fraud_detection - ERROR - Error training model: index 2 is out of bounds for axis 1 with size 2
+Traceback (most recent call last):
+  File "/Users/rudrakshdubey/creditcardfraud/app.py", line 112, in train_new_model
+    results = evaluate_models(models, X_test, y_test)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rudrakshdubey/creditcardfraud/fraud_detection.py", line 457, in evaluate_models
+    plot_evaluation_results(models, X_test, y_test, results)
+  File "/Users/rudrakshdubey/creditcardfraud/fraud_detection.py", line 510, in plot_evaluation_results
+    ax = axes[1, idx]
+         ~~~~^^^^^^^^
+IndexError: index 2 is out of bounds for axis 1 with size 2
+2025-12-19 15:11:18 - fraud_detection - ERROR - Error training model: index 2 is out of bounds for axis 1 with size 2
+Traceback (most recent call last):
+  File "/Users/rudrakshdubey/creditcardfraud/app.py", line 112, in train_new_model
+    results = evaluate_models(models, X_test, y_test)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rudrakshdubey/creditcardfraud/fraud_detection.py", line 457, in evaluate_models
+    plot_evaluation_results(models, X_test, y_test, results)
+  File "/Users/rudrakshdubey/creditcardfraud/fraud_detection.py", line 510, in plot_evaluation_results
+    ax = axes[1, idx]
+         ~~~~^^^^^^^^
+IndexError: index 2 is out of bounds for axis 1 with size 2
+2025-12-19 15:31:55 - fraud_detection - ERROR - Error training model: index 2 is out of bounds for axis 1 with size 2
+Traceback (most recent call last):
+  File "/Users/rudrakshdubey/creditcardfraud/app.py", line 112, in train_new_model
+    results = evaluate_models(models, X_test, y_test)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rudrakshdubey/creditcardfraud/fraud_detection.py", line 457, in evaluate_models
+    plot_evaluation_results(models, X_test, y_test, results)
+  File "/Users/rudrakshdubey/creditcardfraud/fraud_detection.py", line 510, in plot_evaluation_results
+    ax = axes[1, idx]
+         ~~~~^^^^^^^^
+IndexError: index 2 is out of bounds for axis 1 with size 2
+2025-12-19 16:10:03 - fraud_detection - ERROR - Error training model: index 2 is out of bounds for axis 1 with size 2
+Traceback (most recent call last):
+  File "/Users/rudrakshdubey/creditcardfraud/app.py", line 112, in train_new_model
+    results = evaluate_models(models, X_test, y_test)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rudrakshdubey/creditcardfraud/fraud_detection.py", line 457, in evaluate_models
+    plot_evaluation_results(models, X_test, y_test, results)
+  File "/Users/rudrakshdubey/creditcardfraud/fraud_detection.py", line 510, in plot_evaluation_results
+    ax = axes[1, idx]
+         ~~~~^^^^^^^^
+IndexError: index 2 is out of bounds for axis 1 with size 2
