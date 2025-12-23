@@ -34,23 +34,8 @@ def initialize_chatbot():
         return None
     
     try:
-        # System prompt to make the chatbot helpful for fraud detection
-        system_instruction = """You are an AI assistant specialized in credit card fraud detection. 
-Your role is to help users understand:
-1. How fraud detection models work
-2. What transaction features are important
-3. How to interpret fraud predictions
-4. Best practices for fraud prevention
-5. Explain model predictions and probabilities
-
-Be helpful, clear, and educational. If asked about specific transactions, 
-provide insights based on general fraud detection principles."""
-        
         # Use Gemini Pro model
-        model = genai.GenerativeModel(
-            model_name='gemini-pro',
-            system_instruction=system_instruction
-        )
+        model = genai.GenerativeModel('gemini-pro')
         
         return model
         
@@ -85,15 +70,27 @@ def get_chatbot_response(user_message, conversation_history=None):
         if not model:
             return None, "Failed to initialize chatbot model."
         
-        # Build the conversation
-        if conversation_history:
-            # Format history for the model
-            messages = conversation_history + [user_message]
-        else:
-            messages = [user_message]
+        # Add system context to the prompt
+        system_context = """You are an AI assistant specialized in credit card fraud detection. 
+Help users understand:
+1. How fraud detection models work
+2. What transaction features are important
+3. How to interpret fraud predictions
+4. Best practices for fraud prevention
+5. Explain model predictions and probabilities
+
+Be helpful, clear, and educational."""
+        
+        # Build the full prompt with context
+        full_prompt = f"{system_context}\n\nUser Question: {user_message}"
+        
+        # If there's conversation history, include it
+        if conversation_history and len(conversation_history) > 0:
+            history_text = "\n".join([f"Previous: {msg}" for msg in conversation_history[-4:]])  # Last 4 messages
+            full_prompt = f"{system_context}\n\n{history_text}\n\nUser Question: {user_message}"
         
         # Generate response
-        response = model.generate_content(messages)
+        response = model.generate_content(full_prompt)
         
         return response.text, None
         
