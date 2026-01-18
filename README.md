@@ -281,7 +281,4 @@ This project is open source and available for educational purposes.
 - Kaggle for providing the Credit Card Fraud Detection dataset
 - scikit-learn and imbalanced-learn communities for excellent ML libraries
 
----
-
-**Happy Learning! 🎓**
 
